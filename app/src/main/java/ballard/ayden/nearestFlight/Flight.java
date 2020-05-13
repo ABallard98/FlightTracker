@@ -16,6 +16,9 @@ public class Flight {
     private double degrees;
     private double altitude;
 
+    private String estArrival;
+    private String estDept;
+
     /**
      * Constructor of flight object
      * @param jsonArray - jsonArray of flight data
@@ -84,6 +87,26 @@ public class Flight {
 
     public int getAltitude(){
         return (int) this.altitude;
+    }
+
+    public String getIcao(){
+        return this.icao;
+    }
+
+    public String getEstArrival(){
+        return this.estArrival;
+    }
+
+    public String getEstDept(){
+        return this.estDept;
+    }
+
+    public void setEstArrival(String estArrival){
+        this.estArrival = estArrival;
+    }
+
+    public void setEstDept(String estDept){
+        this.estDept = estDept;
     }
 
     /**

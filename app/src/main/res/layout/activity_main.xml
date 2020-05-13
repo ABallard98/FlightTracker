@@ -7,17 +7,41 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:id="@+id/linearLayout"
+        android:layout_width="430dp"
+        android:layout_height="738dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
+            android:layout_width="431dp"
             android:layout_height="match_parent"
             tools:context=".MapsActivity" />
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/loadingPanel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="5dp"
+        android:gravity="center"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="215dp"
+            android:layout_height="217dp"
+            android:indeterminate="true"
+            android:visibility="visible" />
+
+    </RelativeLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
