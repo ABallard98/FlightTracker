@@ -56,6 +56,11 @@ public class FlightDataGrabber {
        return lowestDistance;
     }
 
+    /**
+     * Method to translate a JSONArray of flight data to an ArrayList of Flights
+     * @param jsonArray - flight data
+     * @return ArrayList of Flight type
+     */
     public static ArrayList<Flight> getFlights(JSONArray jsonArray){
         ArrayList<Flight> flights = new ArrayList<>();
         try{
@@ -88,6 +93,12 @@ public class FlightDataGrabber {
         }
     }
 
+    /**
+     * Method to read all text on a web page and return it as a String
+     * @param rd - Reader
+     * @return String
+     * @throws IOException
+     */
     private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;

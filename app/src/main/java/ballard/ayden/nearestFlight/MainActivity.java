@@ -1,8 +1,6 @@
 package ballard.ayden.nearestFlight;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentActivity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,56 +27,76 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
 
-    private GoogleMap gmap;
-    private JSONArray flightData;
-    private SupportMapFragment mapFragment;
-    private RelativeLayout loadingPanel;
+    private GoogleMap gmap; //Google map object
+    private JSONArray flightData; //Flight data
+    private SupportMapFragment mapFragment; //map fragment
+    private RelativeLayout loadingPanel; //Loading panel for progress bar
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //initialise objects
         this.loadingPanel = findViewById(R.id.loadingPanel);
         this.loadingPanel.setVisibility(View.VISIBLE);
-        System.out.println("!!!!PROGRESS BAR SHOULD BE VISIBLE!!!!");
 
         this.mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.onCreate(savedInstanceState);
 
+        //set map properties
         mapFragment.getView().setVisibility(View.GONE);
         mapFragment.getMapAsync(this);
 
     }
 
+    /**
+     * Method to initialise action bar
+     * @param menu - menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Method to perform action corresponding to menu item clicked
+     * @param item - action clicked
+     * @return boolean
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch(item.getItemId()){
-            case(R.id.action_refresh):
+            case(R.id.action_refresh): //refresh flight data
+                Toast.makeText(this,"Refreshing...",Toast.LENGTH_SHORT).show();
                 refreshMarkers();
-                Toast.makeText(this,"refreshed",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Refreshed.",Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return false;
         }
     }
 
+    /**
+     * Method to set map properties upon loading
+     * @param gmap - GoogleMap object
+     */
     @Override
     public void onMapReady(GoogleMap gmap){
         this.gmap = gmap;
+        //set style
         gmap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
         mapFragment.getView().setVisibility(View.VISIBLE);
         gmap.setOnMapLoadedCallback(this);
         gmap.getUiSettings().setScrollGesturesEnabled(false); //false until markers placed
     }
 
+    /**
+     * Method to grab flight data and place markers upon map loaded
+     */
     @Override
     public void onMapLoaded() {
         JSONArray jsonArray = null;
@@ -100,6 +118,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         gmap.getUiSettings().setScrollGesturesEnabled(true);
     }
 
+    /**
+     * Method to refresh flight markers on the GoogleMap object
+     */
     private void refreshMarkers(){
         JSONArray jsonArray = null;
         GrabFlightDataTask grabFlightDataTask = new GrabFlightDataTask(jsonArray);
@@ -118,21 +139,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.out.println("Loaded.");
     }
 
+    /**
+     * Method to add flight marker to the google map object
+     * @param gmap - google map object
+     * @param flight - Flight object
+     */
     private void addFlightMarker(GoogleMap gmap, Flight flight){
         final Flight f = flight;
         final GoogleMap gMap = gmap;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                //if plane has no null properties
                 if(f.getLatitude() != 0 && f.getLongitude() != 0 && f.getDegrees() != 0 &&
                         !f.getCallsign().equals("") && f.getAltitude() != 0){
                     LatLng latLng = new LatLng(f.getLatitude(), f.getLongitude());
 
+                    //Load bitmap flight icon
                     Bitmap icon = BitmapFactory.decodeResource(getResources(),R.drawable.airplane_icon);
+                    //rotate icon to match direction of flight
                     icon = Bitmap.createScaledBitmap(icon,50,50, true);
                     icon = rotateIcon(icon, f.getDegrees());
+                    //set BitMap descriptor
                     BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(icon);
-
+                    //add marker to GoogleMap object
                     gMap.addMarker(new MarkerOptions()
                             .position(latLng)
                             .title("Flight origin: " + f.getOriginCountry())
@@ -143,6 +173,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    /**
+     * Method to rotate BitMap icon by x degrees
+     * @param source - BitMap image to rotate
+     * @param degrees - degrees of rotation
+     * @return BitMap - rotated image
+     */
     private Bitmap rotateIcon(Bitmap source, double degrees){
         Matrix matrix = new Matrix();
         matrix.postRotate((float) degrees);

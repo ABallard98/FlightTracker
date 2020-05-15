@@ -46,6 +46,10 @@ public class Flight {
         this.distance = distance(latitude,longitude,userLat,userLong);
     }
 
+    /**
+     * Constructor for plane based on JSONArray of flight data
+     * @param jsonArray - flight data
+     */
     public Flight(JSONArray jsonArray){
         this.jsonArray = jsonArray;
 

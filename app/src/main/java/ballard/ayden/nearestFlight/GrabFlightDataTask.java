@@ -27,6 +27,10 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
     private JSONArray flightArrvDeptData;
     private ArrayList<Flight> flights;
 
+    /**
+     * Method to grab flight data and return it as a JSONArray Object
+     * @param jsonArray - JSON array of flight data
+     */
     public GrabFlightDataTask(JSONArray jsonArray){
         this.flightData = jsonArray;
         //int currentTime = (int) (new Date().getTime()/1000);
@@ -38,6 +42,11 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
 
     }
 
+    /**
+     * Method to collect flight data from OpenSky API
+     * @param voids
+     * @return JSONArray - array of flight data
+     */
     @Override
     protected JSONArray doInBackground(Void... voids) {
         JSONArray jsonArray;
@@ -50,14 +59,11 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
                 System.out.println(this.flightArrvDeptData.toString());
 
                 //todo call arrv dept finder here
-                this.flights = matchIcaoArrvDept(flightArrvDeptData,flights);
-
+                //this.flights = matchIcaoArrvDept(flightArrvDeptData,flights);
 
             } catch (Exception e){
                 e.printStackTrace();
             }
-
-
         } catch(Exception e){
             e.printStackTrace();
             return null;
@@ -103,6 +109,13 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
         }
     }
 
+    /**
+     * Method to read the Json Data from a URL and return it as a JSONArray
+     * @param url - String of website URL
+     * @return JSONArray
+     * @throws IOException
+     * @throws JSONException
+     */
     private JSONArray readJsonArrayFromUrl(String url) throws IOException, JSONException{
         InputStream is = new URL(url).openStream();
         try{
@@ -115,6 +128,12 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
         }
     }
 
+    /**
+     * Method to read all text on a web page and return it as a String
+     * @param rd - Reader
+     * @return String
+     * @throws IOException
+     */
     private String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -124,22 +143,29 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
         return sb.toString();
     }
 
+    /**
+     * Method to collect the estimated arrival and departure times of flights based on their ICAO
+     * @param flightArrvDeptData - JSONArray of flight arrival/departure times
+     * @param flights - ArrayList of flights
+     * @return ArrayList - flights amended with arrival/departure times
+     * @throws JSONException
+     */
     private ArrayList<Flight> matchIcaoArrvDept(JSONArray flightArrvDeptData, ArrayList<Flight> flights) throws JSONException {
         for(int i = 0; i < flightArrvDeptData.length(); i++){
             JSONObject obj = (JSONObject) flightArrvDeptData.get(i);
             //todo fix ICAO24 matcher for arrival and departure
-//            for(Flight f : flights){
-//                if(f.getIcao().equals(obj.getString("icao24"))&& !obj.getString("estDepartureAirport").equals("null")){
-//                    //if icao matches, assign arrv dept locations
-//                    System.out.println("PAIR FOUND - checked: " + i + " planes");
-//                    f.setEstDept(obj.getString("estDepartureAirport"));
-//                    f.setEstArrival(obj.getString("estArrivalAirport"));
-//
-//                } else {
-//                    f.setEstDept("???");
-//                    f.setEstArrival("???");
-//                }
-//            }
+            for(Flight f : flights){
+                if(f.getIcao().equals(obj.getString("icao24"))&& !obj.getString("estDepartureAirport").equals("null")){
+                    //if icao matches, assign arrv dept locations
+                    System.out.println("PAIR FOUND - checked: " + i + " planes");
+                    f.setEstDept(obj.getString("estDepartureAirport"));
+                    f.setEstArrival(obj.getString("estArrivalAirport"));
+
+                } else {
+                    f.setEstDept("???");
+                    f.setEstArrival("???");
+                }
+            }
         }
         return flights;
     }
