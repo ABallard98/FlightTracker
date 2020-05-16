@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,17 +23,26 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
 
     private GoogleMap gmap; //Google map object
     private JSONArray flightData; //Flight data
+    private ArrayList<Flight> flights; //flight objects
     private SupportMapFragment mapFragment; //map fragment
     private RelativeLayout loadingPanel; //Loading panel for progress bar
+    private Handler handler;
+
+    private int UPDATE_MARKER = 101;
+
+    private HashMap<String, Marker> markerHashMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //initialise objects
         this.loadingPanel = findViewById(R.id.loadingPanel);
         this.loadingPanel.setVisibility(View.VISIBLE);
+        this.markerHashMap = new HashMap<>();
 
         this.mapFragment =
                 (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -49,6 +62,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getView().setVisibility(View.GONE);
         mapFragment.getMapAsync(this);
 
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                super.handleMessage(msg);
+                if(msg.what == UPDATE_MARKER){
+                    try{
+                        Marker marker = (Marker) msg.obj;
+                        LatLng oldLatLng = marker.getPosition();
+                        marker.setPosition(new LatLng(msg.arg1, msg.arg2)); //update marker position
+                        PolylineOptions line = new PolylineOptions().add(oldLatLng, marker.getPosition()).color(Color.RED);
+                        gmap.addPolyline(line);
+                    } catch (Exception e){
+
+                    }
+
+                }
+            }
+        };
     }
 
     /**
@@ -72,7 +103,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch(item.getItemId()){
             case(R.id.action_refresh): //refresh flight data
                 Toast.makeText(this,"Refreshing...",Toast.LENGTH_SHORT).show();
-                refreshMarkers();
+                FlightDataUpdater flightDataUpdater = new FlightDataUpdater(flights,markerHashMap,gmap,this,handler);
+                flightDataUpdater.execute();
                 Toast.makeText(this,"Refreshed.",Toast.LENGTH_SHORT).show();
                 return true;
             default:
@@ -109,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         ArrayList<Flight> flights = grabFlightDataTask.getFlights();
+        this.flights = flights;
         for(int i = 0; i < flights.size(); i++){
             addFlightMarker(gmap, flights.get(i));
         }
@@ -116,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.out.println("Loaded.");
         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
         gmap.getUiSettings().setScrollGesturesEnabled(true);
+
+
     }
 
     /**
@@ -144,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param gmap - google map object
      * @param flight - Flight object
      */
-    private void addFlightMarker(GoogleMap gmap, Flight flight){
+    private void addFlightMarker(final GoogleMap gmap, Flight flight){
         final Flight f = flight;
         final GoogleMap gMap = gmap;
         runOnUiThread(new Runnable() {
@@ -163,11 +198,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     //set BitMap descriptor
                     BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(icon);
                     //add marker to GoogleMap object
-                    gMap.addMarker(new MarkerOptions()
+
+                    MarkerOptions newMarker = new MarkerOptions()
                             .position(latLng)
                             .title("Flight origin: " + f.getOriginCountry())
                             .snippet("Altitude: " + f.getAltitude())
-                            .icon(bitmapDescriptor));
+                            .icon(bitmapDescriptor);
+                    Marker m = gMap.addMarker(newMarker);
+                    markerHashMap.put(f.getIcao(), m); //add to hash map
+
                 }
             }
         });
@@ -185,6 +224,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return Bitmap.createBitmap(source, 0,0, source.getWidth(),
                 source.getHeight(), matrix, true);
     }
-
 
 }
