@@ -59,12 +59,11 @@ public class FlightDataUpdater extends AsyncTask<Void, Void, Void> {
             for(Flight f1 : this.flights){
                 if(f.getIcao().equals(f1.getIcao())){ //if flight matches - update map location
                     if(!isFlightEqualLatLng(f,f1)){ //if the flights have different lat lng
-                        Marker marker = markerHashMap.get(f.getIcao());
 
                         //create message for handler in MainActivity
                         Message msg = handler.obtainMessage();
                         msg.what = UPDATE_MARKER;
-                        msg.obj = marker;
+                        msg.obj = f; //send new flight
                         msg.arg1 = (int) f.getLatitude();
                         msg.arg2 = (int) f.getLongitude();
 
@@ -74,6 +73,11 @@ public class FlightDataUpdater extends AsyncTask<Void, Void, Void> {
             }
         }
         return null;
+    }
+
+    @Override
+    protected void onProgressUpdate(Void... voids){
+        //progress update
     }
 
     /**

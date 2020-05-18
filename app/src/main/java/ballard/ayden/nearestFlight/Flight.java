@@ -1,5 +1,7 @@
 package ballard.ayden.nearestFlight;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONArray;
 
 public class Flight {
@@ -75,6 +77,10 @@ public class Flight {
 
     public double getLongitude(){
         return this.longitude;
+    }
+
+    public LatLng getLatLng(){
+        return new LatLng(this.getLatitude(),this.getLongitude());
     }
 
     public String getCallsign(){
