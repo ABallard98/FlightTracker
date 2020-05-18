@@ -14,27 +14,25 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class FlightDataUpdater extends AsyncTask<Void, Void, Void> {
+public class FlightDataUpdater extends AsyncTask<Void, Message, Void> {
 
     private ArrayList<Flight> flights; //flight data
     private HashMap<String, Marker> markerHashMap; //HashMap of markers on map
     private WeakReference<GoogleMap> gMap; //google map object
-    private Context context; //context of application
     private Handler handler; //handler for new markers
 
     private final int UPDATE_MARKER = 101; //message code for updating markers
+    private final int UPDATE_COMPLETE = 102; //message code for update complete
 
     /**
      * Constructor for FlightDataUpdater object
      * @param flights - ArrayList of flights
      * @param markerHashMap - HashMap of markers
      * @param gMap - google map object
-     * @param context - context of application
      * @param handler - handler
      */
     public FlightDataUpdater(ArrayList<Flight> flights, HashMap<String, Marker> markerHashMap,
-                             GoogleMap gMap, Context context, Handler handler){
-        this.context = context;
+                             GoogleMap gMap, Handler handler){
         this.gMap = new WeakReference<>(gMap);
         this.flights = flights;
         this.markerHashMap = markerHashMap;
@@ -49,7 +47,6 @@ public class FlightDataUpdater extends AsyncTask<Void, Void, Void> {
      */
     @Override
     protected Void doInBackground(Void... voids) {
-
         //grab updated data
         JSONArray flightData = FlightDataGrabber.grabData();
         //turn updated data into an ArrayList of flights
@@ -67,17 +64,26 @@ public class FlightDataUpdater extends AsyncTask<Void, Void, Void> {
                         msg.arg1 = (int) f.getLatitude();
                         msg.arg2 = (int) f.getLongitude();
 
-                        handler.sendMessage(msg); //send msg to handler
+                        //handler.sendMessage(msg); //send msg to handler
+                        publishProgress(msg);
+                        }
                     }
                 }
             }
-        }
         return null;
     }
 
     @Override
-    protected void onProgressUpdate(Void... voids){
-        //progress update
+    protected void onProgressUpdate(Message... messages){
+        handler.sendMessage(messages[0]);
+    }
+
+    @Override
+    protected void onPostExecute(Void voids){
+        //post execute
+        Message postMsg = handler.obtainMessage();
+        postMsg.what = UPDATE_COMPLETE;
+        handler.sendMessage(postMsg);
     }
 
     /**

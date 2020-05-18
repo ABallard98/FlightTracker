@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Handler handler;
 
     private int UPDATE_MARKER = 101;
+    private int UPDATE_COMPLETE = 102;
 
     private HashMap<String, Marker> markerHashMap;
     private HashMap<String, LatLng> originalFlightLocationHashMap;
@@ -69,51 +71,64 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //handler for receiving marker updates
         handler = new Handler(){
             @Override
-            public void handleMessage(Message msg){
+            public void handleMessage(final Message msg){
                 super.handleMessage(msg);
                 if(msg.what == UPDATE_MARKER){
                     try{
-                        //create marker
+                        //get new flight object from msg
                         Flight newFlight = (Flight) msg.obj;
                         //find old marker and remove from google maps
                         Marker oldMarker = markerHashMap.get(newFlight.getIcao());
                         oldMarker.remove();
-
                         //Load bitmap flight icon
-                        Bitmap icon = BitmapFactory.decodeResource(getResources(),R.drawable.airplane_icon);
+                        Bitmap icon = BitmapFactory.decodeResource(getResources(),
+                                R.drawable.airplane_icon);
                         //rotate icon to match direction of flight
-                        icon = Bitmap.createScaledBitmap(icon,50,50, true);
+                        icon = Bitmap.createScaledBitmap(icon,
+                                50,50, true);
                         icon = rotateIcon(icon, newFlight.getDegrees());
                         //set BitMap descriptor
-                        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(icon);
+                        BitmapDescriptor bitmapDescriptor =
+                                BitmapDescriptorFactory.fromBitmap(icon);
 
-                        //update marker
-                        MarkerOptions newMarker = new MarkerOptions()
-                                .position(newFlight.getLatLng())
-                                .title("Flight origin: " + newFlight.getOriginCountry())
-                                .snippet("Altitude: " + newFlight.getAltitude())
-                                .icon(bitmapDescriptor);
+                        updateFlightLocation(newFlight, bitmapDescriptor);
 
-                        //get original latlng of flight
-                        LatLng oldLatLng = originalFlightLocationHashMap.get(newFlight.getIcao());
-
-                        //add marker to google map
-                        Marker m = gmap.addMarker(newMarker);
-
-                        //replace marker in hash map
-                        markerHashMap.put(newFlight.getIcao(), m);
-
-                        //create and add polyline
-                        PolylineOptions line = new PolylineOptions().add(oldLatLng, m.getPosition()).color(Color.RED);
-                        gmap.addPolyline(line);
-                    } catch (Exception e){
+                    }  catch (Exception e){
 
                     }
-
+                } else if(msg.what == UPDATE_COMPLETE){
+//                    FlightDataUpdater flightDataUpdater =
+//                            new FlightDataUpdater(flights,markerHashMap,gmap,handler);
+//                    flightDataUpdater.execute();
                 }
             }
         }; //end of handler
     } //end of onCreate
+
+    private void updateFlightLocation(final Flight newFlight, final BitmapDescriptor bitmapDescriptor){
+        //replace marker
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //update marker
+                final MarkerOptions newMarker = new MarkerOptions()
+                        .position(newFlight.getLatLng())
+                        .title("Flight origin: " + newFlight.getOriginCountry())
+                        .snippet("Altitude: " + newFlight.getAltitude())
+                        .icon(bitmapDescriptor);
+
+                //get original latlng of flight
+                final LatLng oldLatLng = originalFlightLocationHashMap.get(newFlight.getIcao());
+                Marker m = gmap.addMarker(newMarker);
+                markerHashMap.put(newFlight.getIcao(), m);
+                //create and add polyline
+                PolylineOptions line = new PolylineOptions().add(oldLatLng,
+                        m.getPosition()).color(Color.RED);gmap.addPolyline(line);
+            }
+        });
+    }
+
+
 
     /**
      * Method to initialise action bar
@@ -136,9 +151,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch(item.getItemId()){
             case(R.id.action_refresh): //refresh flight data
                 Toast.makeText(this,"Refreshing...",Toast.LENGTH_SHORT).show();
-                FlightDataUpdater flightDataUpdater = new FlightDataUpdater(flights,markerHashMap,gmap,this,handler);
+                FlightDataUpdater flightDataUpdater = new FlightDataUpdater(flights,markerHashMap,gmap,handler);
                 flightDataUpdater.execute();
-                Toast.makeText(this,"Refreshed.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Refreshing...",Toast.LENGTH_SHORT).show();
+
                 return true;
             default:
                 return false;
@@ -172,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
 
-        ArrayList<Flight> flights = grabFlightDataTask.getFlights();
+        final ArrayList<Flight> flights = grabFlightDataTask.getFlights();
 
         this.flights = flights;
         //add each flight to google maps
@@ -183,6 +199,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
         //enable gestures on google maps
         gmap.getUiSettings().setScrollGesturesEnabled(true);
+
+        //startUpdaterThread(flights);
+
+    }
+
+    private void startUpdaterThread(final ArrayList<Flight> flights){
+        Runnable updaterRunnable = new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    FlightDataUpdater flightDataUpdater = new FlightDataUpdater(flights,markerHashMap,gmap,handler);
+                    flightDataUpdater.execute();
+                    try{
+                        Thread.sleep(15000);
+                    } catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        updaterRunnable.run();
     }
 
     /**
