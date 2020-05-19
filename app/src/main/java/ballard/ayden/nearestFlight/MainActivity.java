@@ -10,7 +10,6 @@ import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -97,8 +96,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     }
                 } else if(msg.what == UPDATE_COMPLETE){
-//                    FlightDataUpdater flightDataUpdater =
-//                            new FlightDataUpdater(flights,markerHashMap,gmap,handler);
+//                    FlightDataUpdaterAsync flightDataUpdater =
+//                            new FlightDataUpdaterAsync(flights,markerHashMap,gmap,handler);
 //                    flightDataUpdater.execute();
                 }
             }
@@ -120,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //get original latlng of flight
                 final LatLng oldLatLng = originalFlightLocationHashMap.get(newFlight.getIcao());
                 Marker m = gmap.addMarker(newMarker);
+
                 markerHashMap.put(newFlight.getIcao(), m);
                 //create and add polyline
                 PolylineOptions line = new PolylineOptions().add(oldLatLng,
@@ -151,8 +151,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch(item.getItemId()){
             case(R.id.action_refresh): //refresh flight data
                 Toast.makeText(this,"Refreshing...",Toast.LENGTH_SHORT).show();
-                FlightDataUpdater flightDataUpdater = new FlightDataUpdater(flights,markerHashMap,gmap,handler);
-                flightDataUpdater.execute();
+                FlightDataUpdaterAsync flightDataUpdaterAsync = new FlightDataUpdaterAsync(handler);
+                flightDataUpdaterAsync.execute();
                 Toast.makeText(this,"Refreshing...",Toast.LENGTH_SHORT).show();
 
                 return true;
@@ -202,45 +202,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //startUpdaterThread(flights);
 
-    }
-
-    private void startUpdaterThread(final ArrayList<Flight> flights){
-        Runnable updaterRunnable = new Runnable() {
-            @Override
-            public void run() {
-                while(true){
-                    FlightDataUpdater flightDataUpdater = new FlightDataUpdater(flights,markerHashMap,gmap,handler);
-                    flightDataUpdater.execute();
-                    try{
-                        Thread.sleep(15000);
-                    } catch (InterruptedException e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        };
-        updaterRunnable.run();
-    }
-
-    /**
-     * Method to manually refresh flight markers on the GoogleMap object
-     */
-    private void refreshMarkers(){
-        JSONArray jsonArray = null;
-        GrabFlightDataTask grabFlightDataTask = new GrabFlightDataTask(jsonArray);
-        try{
-            grabFlightDataTask.execute().get();
-            jsonArray = grabFlightDataTask.getFlightData();
-        } catch (Exception e){
-
-        }
-
-        ArrayList<Flight> flights = grabFlightDataTask.getFlights();
-        gmap.clear();
-        for(int i = 0; i < flights.size(); i++){
-            addFlightMarker(gmap, flights.get(i));
-        }
-        System.out.println("Loaded.");
     }
 
     /**
