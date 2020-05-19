@@ -82,9 +82,6 @@ public class GrabFlightDataTask extends AsyncTask<Void, Void, JSONArray> {
         //progress update
     }
 
-    public JSONArray getFlightData(){
-        return this.flightData;
-    }
 
     public ArrayList<Flight> getFlights(){
         return this.flights;

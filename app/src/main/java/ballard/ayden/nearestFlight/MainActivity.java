@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }; //end of handler
     } //end of onCreate
 
-    private void updateFlightLocation(final Flight newFlight, final BitmapDescriptor bitmapDescriptor){
+    private synchronized void updateFlightLocation(final Flight newFlight, final BitmapDescriptor bitmapDescriptor){
         //replace marker
         runOnUiThread(new Runnable() {
             @Override
@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
     }
-
 
 
     /**

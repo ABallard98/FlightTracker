@@ -27,6 +27,7 @@ public class FlightDataUpdaterAsync extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
 
         SharedFlightQueue sharedFlightQueue = new SharedFlightQueue();
+        //todo change this to an array of threads
         FlightUpdaterThread threadA = new FlightUpdaterThread(sharedFlightQueue, handler);
         FlightUpdaterThread threadB = new FlightUpdaterThread(sharedFlightQueue, handler);
         FlightUpdaterThread threadC = new FlightUpdaterThread(sharedFlightQueue, handler);

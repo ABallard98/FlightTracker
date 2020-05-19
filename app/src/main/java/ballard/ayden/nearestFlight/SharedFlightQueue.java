@@ -8,10 +8,13 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class SharedFlightQueue {
 
-    private ArrayList<Flight> flights;
+    private ArrayList<Flight> flights; //list of flights to update
     private Lock lock;
     private boolean isFlightsUpdated;
 
+    /**
+     * Constructor
+     */
     public SharedFlightQueue(){
         this.lock = new ReentrantLock();
         //grab updated data
@@ -27,6 +30,10 @@ public class SharedFlightQueue {
         }
     }
 
+    /**
+     * Dequeue and return the first object in the Flight ArrayList
+     * @return Flight
+     */
     public synchronized Flight dequeueFlight(){
         if(!flights.isEmpty()){
             lock.lock();
@@ -42,6 +49,10 @@ public class SharedFlightQueue {
         return null;
     }
 
+    /**
+     * Return the first object in the Flight ArrayList
+     * @return Flight
+     */
     public synchronized  Flight peekFlight(){
         lock.lock();
         Flight toReturn = flights.get(0);
@@ -49,14 +60,18 @@ public class SharedFlightQueue {
         return  toReturn;
     }
 
-    public boolean isFlightsUpdated(){
-        return isFlightsUpdated;
-    }
-
+    /**
+     * Method to see if the Flight ArrayList is empty or not
+     * @return boolean - true if empty
+     */
     public boolean isEmpty(){
         return flights.isEmpty();
     }
 
+    /**
+     * Method to return the current size of the ArrayList
+     * @return int - size
+     */
     public int getSize(){
         return flights.size();
     }
