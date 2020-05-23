@@ -1,3 +1,9 @@
+/**
+ * This class is made up of static methods to collect flight data from the OpenSky API. Data is
+ * collected in the form of a JSON Array, which can be used to make the Flight objects.
+ * @Author Ayden Ballard
+ */
+
 package ballard.ayden.nearestFlight;
 
 import java.io.*;

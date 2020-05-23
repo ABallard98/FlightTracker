@@ -31,18 +31,21 @@ import org.json.JSONArray;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
+public class MainActivity extends AppCompatActivity
+        implements OnMapReadyCallback, GoogleMap.OnMapLoadedCallback {
 
     private GoogleMap gmap; //Google map object
     private JSONArray flightData; //Flight data
     private ArrayList<Flight> flights; //flight objects
     private SupportMapFragment mapFragment; //map fragment
     private RelativeLayout loadingPanel; //Loading panel for progress bar
-    private Handler handler;
 
+    //handler variables
+    private Handler handler;
     private int UPDATE_MARKER = 101;
     private int UPDATE_COMPLETE = 102;
 
+    //data structures
     private HashMap<String, Marker> markerHashMap;
     private HashMap<String, LatLng> originalFlightLocationHashMap;
 
@@ -104,6 +107,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }; //end of handler
     } //end of onCreate
 
+    /**
+     * Method to update the location of a given flight and draw a PolyLine from the old location,
+     * to the new location
+     * @param newFlight - flight to be updated
+     * @param bitmapDescriptor - rotated bitmap, based on flight's degrees from north, for marker
+     */
     private synchronized void updateFlightLocation(final Flight newFlight, final BitmapDescriptor bitmapDescriptor){
         //replace marker
         runOnUiThread(new Runnable() {

@@ -1,3 +1,9 @@
+/**
+ * This class represents a Flight, which consists of a planes ICAO, call sign, origin country,
+ * time position, last contact, longitude, latitude, degrees from north and altitude.
+ * @Author Ayden Ballard
+ */
+
 package ballard.ayden.nearestFlight;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -71,50 +77,98 @@ public class Flight {
         }
     }
 
+    /**
+     * Method to return the flight's latitude
+     * @return double - latitude
+     */
     public double getLatitude(){
         return this.latitude;
     }
 
+    /**
+     * Method to return the flight's longitude
+     * @return double - longitude
+     */
     public double getLongitude(){
         return this.longitude;
     }
 
+    /**
+     * Method to return the latitude and longitude of the flight as an LatLng object
+     * @return LatLng - flight's current position
+     */
     public LatLng getLatLng(){
         return new LatLng(this.getLatitude(),this.getLongitude());
     }
 
+    /**
+     * Method to return the call sign of the flight
+     * @return String - call sign
+     */
     public String getCallsign(){
         return this.callsign;
     }
 
+    /**
+     * Method to return the degrees from north of the flight
+     * @return double - degrees from north
+     */
     public double getDegrees(){
         return this.degrees;
     }
 
+    /**
+     * Method to return the origin country of the flight
+     * @return String - origin country
+     */
     public String getOriginCountry(){
         return this.originCountry;
     }
 
+    /**
+     * Method to return the altitude of the flight in kilometers
+     * @return int - altitude (km)
+     */
     public int getAltitude(){
         return (int) this.altitude;
     }
 
+    /**
+     * Method to return the ICAO of the flight
+     * @return String - ICAO
+     */
     public String getIcao(){
         return this.icao;
     }
 
+    /**
+     * Method to get the estimated arrival airport of the flight
+     * @return String - estimated arrival airport
+     */
     public String getEstArrival(){
         return this.estArrival;
     }
 
+    /**
+     * Method to get the estimated departure airport of the flight
+     * @return String - estimated departure airport
+     */
     public String getEstDept(){
         return this.estDept;
     }
 
+    /**
+     * Method to set the estimated arrival airport
+     * @param estArrival - String
+     */
     public void setEstArrival(String estArrival){
         this.estArrival = estArrival;
     }
 
+    /**
+     * Method to set the estimated departure airport
+     * @param estDept - String
+     */
     public void setEstDept(String estDept){
         this.estDept = estDept;
     }

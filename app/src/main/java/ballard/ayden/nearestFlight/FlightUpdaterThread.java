@@ -1,3 +1,9 @@
+/**
+ * This Thread class is used to update a Flights location, by de-queuing from the
+ * SharedFlightQueue and sending the new data to the MainActivity through a handler.
+ * @Author Ayden Ballard
+ */
+
 package ballard.ayden.nearestFlight;
 
 import android.os.Handler;

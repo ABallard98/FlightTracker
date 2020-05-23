@@ -1,3 +1,9 @@
+/**
+ * This class represents a SharedQueue data structure, implemented using an ArrayList of Flights and
+ * a Lock for synchronization.
+ * @Author Ayden Ballard
+ */
+
 package ballard.ayden.nearestFlight;
 
 import org.json.JSONArray;

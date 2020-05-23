@@ -1,3 +1,10 @@
+/**
+ * This class is a AsyncTask which collects the OpenSky API data, and creates flight objects,
+ * and parses the newly created Flight objects to the MainActivity through a handler, to then
+ * be made into markers and places on the GoogleMaps interface.
+ * @Author Ayden Ballard
+ */
+
 package ballard.ayden.nearestFlight;
 
 import android.os.AsyncTask;
